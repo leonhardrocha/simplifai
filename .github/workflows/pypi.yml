@@ -1,0 +1,37 @@
+name: Deploy to PyPI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Create .pypirc
+      run: |
+        echo "[distutils]" >> ~/.pypirc
+        echo "index-servers =" >> ~/.pypirc
+        echo "    pypi" >> ~/.pypirc
+        echo "    simplifai" >> ~/.pypirc
+        echo "" >> ~/.pypirc
+        echo "[pypi]" >> ~/.pypirc
+        echo "username = __token__" >> ~/.pypirc
+        echo "password = ${{ secrets.PYPI_API_TOKEN }}" >> ~/.pypirc
+        echo "" >> ~/.pypirc
+        echo "[simplifai]" >> ~/.pypirc
+        repository = https://upload.pypi.org/legacy/
+        echo "username = __token__" >> ~/.pypirc
+        echo "password = ${{ secrets.PYPI_API_TOKEN }}" >> ~/.pypirc
+
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Deploy
+      run: python setup.py sdist bdist_wheel
